@@ -18,6 +18,6 @@ COPY app.py .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Pre-download the model
-RUN python -c "import os; import whisperx; whisperx.load_model(os.getenv('WHISPER_MODEL', 'large-v3'), device='cpu')"
+# RUN python -c "import os; import whisperx; whisperx.load_model(os.getenv('WHISPER_MODEL', 'large-v3'), device='cpu')"
 
 CMD ["python", "app.py"]
