@@ -1,5 +1,4 @@
-# Base image with CUDA 11.8
-FROM nvidia/cuda:11.8.0-runtime-ubuntu22.04
+FROM python:3.10-slim  # Or any Python version you need
 
 # Set working directory
 WORKDIR /app
@@ -21,9 +20,6 @@ COPY app.py .
 # Install Python dependencies
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
-
-# Load environment variables
-RUN touch .env
 
 # Pre-download the default model to reduce cold start time
 RUN python -c "import os; import whisperx; whisperx.load_model(os.getenv('WHISPER_MODEL', 'large-v3'), device='cuda')"
