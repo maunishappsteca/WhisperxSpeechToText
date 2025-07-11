@@ -57,7 +57,7 @@ def process_transcription(file_name: str, model_size: str, language: Optional[st
         # =====================
         # 3. LOAD MODEL
         # =====================
-        device = "cuda" if runpod.utils.rp_utils.is_gpu_available() else "cpu"
+        device = "cuda" if os.environ.get("RUNPOD_SERVERLESS_MODE") == "true" else "cpu"
         print(f"Loading {model_size} model on {device}...")
         model = whisperx.load_model(
             model_size,
