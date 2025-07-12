@@ -26,19 +26,24 @@ COPY app.py .
 # RUN mkdir -p /app/models && chmod -R 777 /app/models    
 
 
-# Set environment variables for model and cache
+
+# Set environment variables for model name and cache directory
 ENV WHISPER_MODEL=large-v3
 ENV WHISPER_MODEL_CACHE=/app/models
+ENV WHISPER_LANGUAGE=en
 
-# Create model cache directory
 RUN mkdir -p $WHISPER_MODEL_CACHE && chmod -R 777 $WHISPER_MODEL_CACHE
 
-# Pre-download Whisper model using CPU
-RUN python -c "import os; import whisperx; whisperx.load_model(os.environ.get('WHISPER_MODEL', 'large-v3'), device='cpu', download_root=os.environ.get('WHISPER_MODEL_CACHE', '/app/models'))"
-
-
-# Pre-download model to container (using CPU during build)
-RUN python -c "import os; import whisperx; whisperx.load_model(os.getenv('WHISPER_MODEL'), device='cpu', download_root=os.getenv('WHISPER_MODEL_CACHE'))"
+# Pre-download the whisper model using whisper and whisperx
+RUN python -c "\
+import os; \
+import whisper; \
+import whisperx; \
+model_name = os.environ.get('WHISPER_MODEL', 'large-v3'); \
+download_root = os.environ.get('WHISPER_MODEL_CACHE', '/app/models'); \
+print(f'Downloading Whisper model: {model_name}'); \
+whisper.load_model(model_name, download_root=download_root); \
+print('Passing loaded model to WhisperX...');
 
 
 
