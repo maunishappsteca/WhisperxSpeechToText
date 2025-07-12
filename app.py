@@ -37,33 +37,22 @@ def convert_to_wav(input_path: str) -> str:
 
 
 # --- Model Loader ---
+# --- Improved Model Loader ---
 def load_cached_model(model_size: str, device: str, language: Optional[str]):
-    """Download from Hugging Face and load WhisperX with cache"""
-
-    # Hugging Face repo for Whisper model
-    hf_repo = f"openai/whisper-{model_size}"
-    local_model_path = os.path.join(MODEL_CACHE_DIR, model_size)
-
-    # Download from HF if not cached
-    if not os.path.exists(local_model_path):
-        print(f"Downloading model '{model_size}' from Hugging Face...")
-        snapshot_download(
-            repo_id=hf_repo,
-            local_dir=local_model_path,
-            local_dir_use_symlinks=False,
-            resume_download=True
-        )
-    else:
-        print(f"Model already cached at {local_model_path}")
-
-    print("Loading model with WhisperX...")
+    """Load pre-downloaded model with validation"""
+    expected_path = os.path.join(MODEL_CACHE_DIR, model_size)
+    
+    if not os.path.exists(expected_path):
+        raise RuntimeError(f"Model not found at {expected_path}. Must pre-download during build.")
+    
+    print(f"Loading {model_size} from cache at {expected_path}")
     return whisperx.load_model(
-        language=None if language == "-" else language,
-        model_name=model_size,
+        model_size,
         device=device,
         compute_type=COMPUTE_TYPE,
-        download_root=MODEL_CACHE_DIR
+        download_root=MODEL_CACHE_DIR  # Critical for cache usage
     )
+
 
 
 # --- Main Transcription Logic ---
