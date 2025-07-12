@@ -1,34 +1,32 @@
-# Use official Python image
-FROM python:3.10-slim
+# Use NVIDIA CUDA 12.1 base image (supports Ada GPUs)
+FROM nvidia/cuda:12.1.1-base-ubuntu22.04
 
-# Set working directory
 WORKDIR /app
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     git \
+    python3-pip \
+    libcudnn8=8.9.4.*-1+cuda12.1 \  # Explicit cuDNN for Ada
     && rm -rf /var/lib/apt/lists/*
 
-# Copy Python files
+# Set library paths for Ada GPUs
+ENV LD_LIBRARY_PATH=/usr/local/cuda-12.1/lib64:$LD_LIBRARY_PATH
+ENV CUDA_HOME=/usr/local/cuda-12.1
+
+# Install Python dependencies with CUDA 12.1 support
 COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Download model (same as before)
+RUN mkdir -p /app/models && \
+    python -c "\
+    from huggingface_hub import snapshot_download; \
+    snapshot_download(repo_id='openai/whisper-large-v3', \
+    local_dir='/app/models/large-v3', \
+    local_dir_use_symlinks=False)"
+
 COPY app.py .
 
-
-# Add this before your pip install:
-RUN pip install huggingface-hub
-
-# Add model download step:
-RUN python -c "\
-import os; \
-from huggingface_hub import snapshot_download; \
-model_size = os.getenv('WHISPER_MODEL', 'large-v3'); \
-cache_dir = os.getenv('WHISPER_MODEL_CACHE', '/app/models'); \
-print(f'Downloading {model_size} to {cache_dir}'); \
-snapshot_download(repo_id=f'openai/whisper-{model_size}', \
-                  local_dir=os.path.join(cache_dir, model_size), \
-                  local_dir_use_symlinks=False, \
-                  resume_download=True)"
-                  
-    
 CMD ["python", "app.py"]
