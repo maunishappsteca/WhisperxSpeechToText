@@ -21,10 +21,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # RUN python -c "import os; import whisperx; whisperx.load_model(os.getenv('WHISPER_MODEL', 'large-v3'), device='cpu')"
 
 # Pre-download model to container (using CPU during build)
-ENV WHISPER_MODEL=large-v3
-RUN python -c "import os; import whisperx; whisperx.load_model(os.getenv('WHISPER_MODEL'), device='cpu', download_root='/app/models')"
-
-# Set environment variable for runtime model location
-ENV WHISPER_MODEL_CACHE=/app/models
+RUN python -c "import os; import whisperx; whisperx.load_model(os.getenv('WHISPER_MODEL'), device='cpu', download_root=os.getenv('WHISPER_MODEL_CACHE'))"
 
 CMD ["python", "app.py"]
