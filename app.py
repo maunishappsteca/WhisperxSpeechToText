@@ -11,6 +11,22 @@ from botocore.exceptions import ClientError
 COMPUTE_TYPE = "float32"  # Using float32 for precision with large-v3
 BATCH_SIZE = 4
 S3_BUCKET = os.environ.get("S3_BUCKET_NAME")
+MODEL_CACHE_DIR = os.getenv("WHISPER_MODEL_CACHE", "/app/models")  # Use pre-download location
+
+
+# --- Model Loading Function ---
+def load_cached_model(model_size: str, device: str):
+    """Load model from pre-downloaded cache"""
+    print(f"Loading {model_size} from cache at {MODEL_CACHE_DIR}")
+    return whisperx.load_model(
+        model_size,
+        device=device,
+        compute_type=COMPUTE_TYPE,
+        language=None if language == "-" else language,
+        download_root=MODEL_CACHE_DIR  # Critical change - uses cached model
+    )
+
+    
 
 # Initialize S3 client
 s3 = boto3.client(
@@ -59,12 +75,13 @@ def process_transcription(file_name: str, model_size: str, language: Optional[st
         # =====================
         device = "cuda" if os.environ.get("RUNPOD_SERVERLESS_MODE") == "true" else "cpu"
         print(f"Loading {model_size} model on {device}...")
-        model = whisperx.load_model(
-            model_size,
-            device=device,
-            compute_type=COMPUTE_TYPE,
-            language=None if language == "-" else language
-        )
+        model = load_cached_model(model_size, device)
+        # model = whisperx.load_model(
+        #     model_size,
+        #     device=device,
+        #     compute_type=COMPUTE_TYPE,
+        #     language=None if language == "-" else language
+        # )
 
         # =====================
         # 4. TRANSCRIBE
