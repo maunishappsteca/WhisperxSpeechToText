@@ -45,14 +45,17 @@ def convert_to_wav(input_path: str) -> str:
         ], check=True)
         return output_path
     except subprocess.CalledProcessError as e:
+        log(f"Fmpeg conversion failed error: {str(e)}", "ERROR")
         raise RuntimeError(f"FFmpeg conversion failed: {str(e)}")
     except Exception as e:
+        log(f"Audio conversion error: {str(e)}", "ERROR")
         raise RuntimeError(f"Audio conversion error: {str(e)}")
 
 def load_model(model_size: str, language: Optional[str]):
     """Load Whisper model with CPU optimization"""
     try:
         if not ensure_model_cache_dir():
+            log(f"Model cache directory is not accessible", "ERROR")
             raise RuntimeError("Model cache directory is not accessible")
             
         return whisperx.load_model(
@@ -63,6 +66,7 @@ def load_model(model_size: str, language: Optional[str]):
             language=language if language and language != "-" else None
         )
     except Exception as e:
+        log(f"Model loading failed: {str(e)}", "ERROR")
         raise RuntimeError(f"Model loading failed: {str(e)}")
 
 def transcribe_audio(audio_path: str, model_size: str, language: Optional[str], align: bool):
@@ -87,6 +91,7 @@ def transcribe_audio(audio_path: str, model_size: str, language: Optional[str], 
                     return_char_alignments=False
                 )
             except Exception as e:
+                log(f"Alignment skipped: {str(e)}", "ERROR")
                 print(f"Alignment skipped: {str(e)}")
         
         return {
@@ -96,6 +101,7 @@ def transcribe_audio(audio_path: str, model_size: str, language: Optional[str], 
             "model": model_size
         }
     except Exception as e:
+        log(f"Transcription failed: {str(e)}", "ERROR")
         raise RuntimeError(f"Transcription failed: {str(e)}")
 
 def handler(job):
