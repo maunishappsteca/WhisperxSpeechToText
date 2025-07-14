@@ -1,11 +1,14 @@
-whisperx==3.1.1  # Pinned to specific version
+whisperx==3.1.1
 openai-whisper==20231117
-torch==2.2.1+cu121  # Explicit CUDA 12.1 version
-torchaudio==2.2.1+cu121
 boto3==1.34.0
 ffmpeg-python==0.2.0
 python-dotenv==1.0.0
 runpod==1.1.2
 faster-whisper==0.10.0
 huggingface-hub==0.22.2
-nvidia-cudnn-cu12==8.9.4  # Explicit cuDNN for CUDA 12.1
+nvidia-cudnn-cu12==8.9.4
+
+# PyTorch with CUDA 12.1 support (install from PyTorch's official channel)
+--extra-index-url https://download.pytorch.org/whl/cu121
+torch==2.2.1
+torchaudio==2.2.1
