@@ -18,10 +18,8 @@ ENV WHISPER_MODEL_CACHE=/app/models
 
 # Install Python dependencies with pinned versions
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-
-
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Pre-download model with validation
 RUN mkdir -p /app/models && \
@@ -31,7 +29,6 @@ RUN mkdir -p /app/models && \
     local_dir='/app/models/large-v3', \
     local_dir_use_symlinks=False, \
     token=os.getenv('HF_TOKEN'))"
-    
 
 COPY app.py .
 
